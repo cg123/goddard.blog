@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="dark light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+
+    
+    
+    
+    <title>
+         On Frankenllama
+        
+    </title>
+
+        
+            <meta property="og:title" content="On Frankenllama" />
+        
+     
+
+     
+         
+     
+
+     
+         
+    
+
+    
+    
+        <link rel="icon" type="image/png" href=&#x2F;icon&#x2F;favicon.png />
+    
+
+    
+    
+        <link href=https://goddard.blog/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+
+    
+        
+            <script>
+            MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+              }
+            };
+            </script>
+        
+        <script type="text/javascript" id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+    
+
+    
+    <link rel="alternate" type="application/atom+xml" title="" href="https://goddard.blog/atom.xml">
+
+
+    
+    
+        <link rel="stylesheet" type="text/css" href=https://goddard.blog/theme/light.css />
+        <link id="darkModeStyle" rel="stylesheet" type="text/css" href="https://goddard.blog/theme/dark.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="screen" href=https://goddard.blog/main.css />
+
+    
+
+    <script src=https://goddard.blog/js/feather.min.js></script>
+</head>
+
+<body>
+    <div class="content">
+        <header>
+    <div class="main">
+        <a href=https:&#x2F;&#x2F;goddard.blog></a>
+
+        
+        <div class="socials">
+            
+            <a rel="me" href="https:&#x2F;&#x2F;github.com&#x2F;cg123&#x2F;" class="social">
+                <img alt=github src="/social_icons/github.svg">
+            </a>
+            
+        </div>
+        
+    </div>
+
+    <nav>
+        
+            <a href=&#x2F;posts style="margin-left: 0.7em">&#x2F;posts</a>
+        
+            <a href=&#x2F;about style="margin-left: 0.7em">&#x2F;about</a>
+        
+    </nav>
+
+    
+    <nav>
+        <a id="dark-mode-toggle" onclick="toggleTheme()" href=""></a>
+        <script src=https://goddard.blog/js/themetoggle.js></script>
+    </nav>
+    
+</header>
+
+        
+        
+    
+<main>
+    <article>
+        <div class="title">
+            
+            
+    <div class="page-header">
+        On Frankenllama
+    </div>
+
+
+                <div class="meta">
+                    
+                        Posted on <time>2023-08-28</time>
+                    
+
+                    
+                </div>
+                
+
+        
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/llama/">#llama</a>&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/crime/">#crime</a></span>
+    
+        </div>
+
+        
+
+        
+        
+            
+                <h1>Table of Contents</h1>
+                <ul>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#background">Background</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#i-ll-do-it-myself">I&#x27;ll Do It Myself</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#parameter-sizes-aren-t-real">Parameter Sizes Aren&#x27;t Real</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#open-tensor-surgery">Open Tensor Surgery</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#results">Results</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#conclusions">Conclusions</a>
+                        
+                            <ul>
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#parameters-are-not-inviolable">Parameters are Not Inviolable</a>
+                                    </li>
+
+                                    
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#give-us-the-34b-model-meta">Give Us The 34b Model, Meta</a>
+                                    </li>
+
+                                    
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#this-particular-approach-mostly-works-but-probably-don-t-use-it">This Particular Approach Mostly Works but Probably Don&#x27;t Use It</a>
+                                    </li>
+
+                                    
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/frankenllama/#i-wish-i-had-a-larger-gpu-budget">I Wish I Had a Larger GPU Budget</a>
+                                    </li>
+
+                                    
+                                
+                            </ul>
+                        
+                    </li>
+                
+                </ul>
+            
+        
+
+        <section class="body">
+            <h2 id="background">Background</h2>
+<p>Meta's release of the weights of the Llama language models has been one of the more interesting things to happen to the open-source machine learning community in recent memory. Having such a powerful language model available to tinker with locally, and in sizes well-suited to experiments with consumer hardware, has led to a lot of very interesting research coming out of dimly lit basements across the world. </p>
+<p>The release of the second generation of Llama models was a delight. Trained on a dataset twice the size and with a 4096-token context length, Llama 2 was in many respects a perfect iterative improvement upon an already successful formula. However, there was an unfortunate omission.</p>
+<p>Llama 1 was released in four sizes: 7b, 13b, 33b, and 65b parameters. All were (and are) useful in different niches. The 7b model can be offputtingly capable when trained on specific tasks. 65b is comparable to gpt-3.5-turbo if you squint really hard. 13b is also a size. And much loved by many, the 33b parameter model was the perfect tradeoff between size and capability when quantized to 4 bits and run on a 24gb video card.</p>
+<p>Llama 2 was trained in four sizes: 7b, 13b, 34b, and 70b parameters. Three of them were released. One was delayed for being too spicy. And of course it was the good one.</p>
+<h2 id="i-ll-do-it-myself">I'll Do It Myself</h2>
+<p>As we all know, if a company announces that a product that you want is delayed: it means that it's never going to happen and you should get really mad about it on the internet.</p>
+<p>Where is the approximately thirty billion parameter Llama 2 model, Meta? Where is it?</p>
+<p>After almost an hour of patient waiting I of course came to this rational conclusion and decided to do something about it. How hard could it be? We have a perfectly good Llama-2-13b model that just needs a little thickening up. Stuff a whole bunch more bees in there and we're golden. I've got this.</p>
+<p>So what exactly is the difference between a 13b model and a 33b model? The architecture of the two is almost identical, with a few exceptions. Here's a neat little table.</p>
+<table><thead><tr><th></th><th>13b</th><th>33b</th></tr></thead><tbody>
+<tr><td>Hidden layers</td><td>40</td><td>60</td></tr>
+<tr><td>Hidden size</td><td>5120</td><td>6656</td></tr>
+<tr><td>Num. attention heads</td><td>40</td><td>52</td></tr>
+<tr><td>Intermediate size</td><td>13824</td><td>17920</td></tr>
+</tbody></table>
+<p>We can summarize by saying that there are two major differences: 33b has a) more layers and b) wider latent spaces. This presents two obvious routes to pursue in our quest to embiggen. Adding more layers would work nicely, but surely just duplicating existing layers would never work<sup class="footnote-reference"><a href="#fn-layers">1</a></sup>. Expanding the latent spaces is a much more straightforward task.</p>
+<h2 id="parameter-sizes-aren-t-real">Parameter Sizes Aren't Real</h2>
+<p>The basic insight behind the approach is simple. The nonlinearities in Llama models that directly touch the output are (almost) all element-wise. This means that if we can guarantee that the first $n$ values of a hidden state vector are unchanged from a base model, then the first $n$ values of the output will be unchanged as well.</p>
+<p>The hidden state vectors in a Llama model are interacted with in the following ways:</p>
+<ul>
+<li><code>embed_tokens</code> transforms tokens into initial hidden state vectors</li>
+<li><code>layer.self_attn</code> projects hidden state vectors into multiple lower-dimensional spaces, does some stuff, then does a linear transformation back</li>
+<li><code>layer.mlp</code> projects into an intermediate space, does stuff, then a linear transformation back</li>
+<li><code>lm_head</code> transforms final hidden state vectors into logits</li>
+<li>various <code>norm</code>s do their <code>norm</code>ing</li>
+</ul>
+<p>If we can get these operations to have the same results as they do in an Official(tm) Llama model, then we can do whatever else we want with the parameters without any degradation in performance. Aside from the <code>norms</code>, these parameters are all matrices, which provides an easy way to meet this guarantee. If our original model's matrix $M$ is of size $(f_{out}, f_{in})$, then we can create an extended matrix $M^\prime$ of size $(f_{out}^\prime&gt;f_{out}, f_{in}^\prime&gt;f_{in})$ and shove <em>whatever garbage we want</em> in there so long as $M^\prime(i\leq f_{out}, j\leq f_{in}) = M(i, j)$ and $M^\prime(i\leq f_{out},j\gt f_{in}) = 0$. More visually, we can build any block matrix along these lines:</p>
+<p>$$
+\begin{pmatrix} M &amp; 0 \\ A &amp; B \end{pmatrix}
+$$</p>
+<p>But now what to put there? Literature exists on simple zero-extending, with apparent good results. But it would be nice to have potentially useful features in the new extended matrix if there is to be a hope of improving performance without ridiculously long continued training. And what's that I see over there in the corner? Is it perhaps original-flavor Llama 33b, chock full of succulent attention heads?</p>
+<h2 id="open-tensor-surgery">Open Tensor Surgery</h2>
+<p>I wrote a simple <a href="https://huggingface.co/chargoddard/llama2-22b/blob/main/frankenllama_22b.py">script</a> to smash together matrices in this fashion and proceeded to build two different frankenmodels. Both were around 22b parameters, which comes from maintaining the same number of layers but matching the latent dimensions of Llama-1 33b. They are available on my Huggingface page here: <a href="https://huggingface.co/chargoddard/llama2-22b/">$A=0$ (block diagonal)</a>, and <a href="https://huggingface.co/chargoddard/llama2-22b-blocktriangular/">$A\neq 0$ (block triangular)</a>.</p>
+<p>Both were given extensive training to integrate the donated parameters. By this I mean I spent like twelve dollars of runpod GPU credits to QLoRA train them on the barest sliver of the RedPajama dataset. And after all of this, was it the model I dreamed of? Does it compare to that sweet, heavenly 34b Llama-2 that Meta dangles over our heads, tormenting us as the food scraps on a table do a hungry dachsund?</p>
+<h2 id="results">Results</h2>
+<p>Nah.</p>
+<br />
+<br />
+<br />
+<p>Alright, it was actually pretty okay! The models are both entirely coherent, and the community produced a number of fine tunes and merges. People seemed to like them! But there are a few problems from my perspective.</p>
+<p>The merge produced with $A=0$ is almost completely untrainable. I made a few attempts at instruction tuning it and would often see beautiful loss curves, then sample the output and see a single token repeated infinitely. The whole idea was to give the model useful, meaningful new features to quickly improve performance during training. For $A=0$, this turned out to be Extremely Not The Case. I suspect the sheer number of zeros makes it too easy to overfit.</p>
+<p>The $A\neq 0$ merge has better training dynamics, and does seem to maybe converge a little faster than the base 13b model when given the same dataset. This could easily be wishful thinking, hyperparameter differences, or luck of the draw though. I don't have nearly the kind of compute budget needed to rigorously test that.</p>
+<p>I did bungle the handling of <code>norm</code> parameters in this experiment - to properly match the output of the base model, they should be zero extended but I just slapped the extra values on the end figuring it would be fine. It was! But not 100% correct.</p>
+<p>And there's also the simple question of: is it better than the original 13b? From benchmarks, the answer is a resounding &quot;ehhhh, maybe?&quot;</p>
+<table><thead><tr><th>model</th><th>Average</th><th>ARC</th><th>HellaSwag</th><th>MMLU</th><th>TruthfulQA</th></tr></thead><tbody>
+<tr><td>llama2-22b</td><td>58.9</td><td>58.53</td><td>82.55</td><td>54.68</td><td>38.84</td></tr>
+<tr><td>llama2-22b-blocktriangular</td><td>58.77</td><td>58.53</td><td>82.59</td><td>54.64</td><td>39.3</td></tr>
+<tr><td>llama-2-13b</td><td>58.66</td><td>59.39</td><td>82.13</td><td>55.77</td><td>37.38</td></tr>
+</tbody></table>
+<p>A small increase in HellaSwag and TruthfulQA, and a small decrease in ARC and MMLU, places both versions slightly ahead of Llama-2-13b on the HuggingFace leaderboard. Meaningfully? Not really. You could argue that this is a decent win given the small amount of compute used.</p>
+<h2 id="conclusions">Conclusions</h2>
+<p>So what are our takeaways here?</p>
+<h3 id="parameters-are-not-inviolable">Parameters are Not Inviolable</h3>
+<p>It's quite common to think of models as monolithic and unchangeable once they are trained. Frankenllama 22b model stands as a solid declaration that with a token nod to the mathematics of it, you can commit grievous crimes against man and nature alike and still have a completely workable model. Fine-tuning is not the end-all of experimentation, and there is lots of room to try things that sound absurd and get interesting results.</p>
+<h3 id="give-us-the-34b-model-meta">Give Us The 34b Model, Meta</h3>
+<p>C'mon, just chuck it out there. Who needs a chat-trained version? It's fine, it's beautiful just the way it is. Pretty please?</p>
+<h3 id="this-particular-approach-mostly-works-but-probably-don-t-use-it">This Particular Approach Mostly Works but Probably Don't Use It</h3>
+<p>It works, but not to the point that you couldn't get better results with the same budget from progressive growing or fine tuning on a carefully curated dataset. There's probably something interesting to explore in selecting specific features to use from a donor model. Permuting the donor matrices to minimize the difference with the final block matrix could potentially be an interesting future experiment.</p>
+<h3 id="i-wish-i-had-a-larger-gpu-budget">I Wish I Had a Larger GPU Budget</h3>
+<p>Yeah. But don't we all?</p>
+<p>Anyway, thanks for coming to my TED talk.</p>
+<div class="footnote-definition" id="fn-layers"><sup class="footnote-definition-label">1</sup>
+<p>It totally does. Better, actually. Later article to come maybe? We'll see.</p>
+</div>
+
+        </section>
+    </article>
+</main>
+
+
+    </div>
+</body>
+
+</html>

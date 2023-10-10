@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://goddard.blog/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/about/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/posts/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/posts/frankenllama/</loc>
+        <lastmod>2023-08-28</lastmod>
+    </url>
+    <url>
+        <loc>https://goddard.blog/posts/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/tags/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/tags/crime/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/tags/llama/</loc>
+    </url>
+</urlset>
