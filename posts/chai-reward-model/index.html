@@ -177,7 +177,7 @@
 </span></code></pre>
 <p>And now we have <code>gpt2-small</code>, weighing in at 96M parameters. Much better!</p>
 <h1 id="training">Training</h1>
-<p>Now it's time to cram a whole bunch of data in there. Chai has provided a nice <a href="https://huggingface.com/ChaiML/20231012_chai_prize_reward_model_data">dataset</a> of real feedback from their users, which will serve us just fine. It's a little unusual in that it provides a binary 'thumbs up'/'thumbs down' label on single conversations, as opposed to the accept/reject pair used in typical RLHF schemes. That just means we can approach this as simple sequence classification instead of a pairwise rating objective.</p>
+<p>Now it's time to cram a whole bunch of data in there. Chai has provided a nice <a href="https://huggingface.co/datasets/ChaiML/20231012_chai_prize_reward_model_data">dataset</a> of real feedback from their users, which will serve us just fine. It's a little unusual in that it provides a binary 'thumbs up'/'thumbs down' label on single conversations, as opposed to the accept/reject pair used in typical RLHF schemes. That just means we can approach this as simple sequence classification instead of a pairwise rating objective.</p>
 <p>Let's crank out a tiny bit of code to get <code>transformers.Trainer</code> to work for us:</p>
 <pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#b48ead;">import </span><span>transformers, datasets
 </span><span>
