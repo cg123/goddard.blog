@@ -238,6 +238,7 @@
 </span><span>(</span><span style="color:#bf616a;">tensor</span><span>([</span><span style="color:#d08770;">0.5567</span><span>], </span><span style="color:#bf616a;">device</span><span>=&#39;</span><span style="color:#a3be8c;">cuda:0</span><span>&#39;), </span><span style="color:#d08770;">1</span><span>)
 </span></code></pre>
 <p>Alright, that's two points that are on the correct side of average! And two points make a line. That line's slope? Success.</p>
+<p>For my next pass at this I'm going to train two models and compare them - one on the Chai binary labelled dataset, and another on Anthropic's public rlhf data. I'll be curious to see how the two differ. To facilitate this I've written a script that can train a model on either objective, which is hideous but available <a href="https://goddard.blog/code/train-reward-model.py">here</a>.</p>
 
         </section>
     </article>
