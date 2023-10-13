@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+
+    
+    
+    
+    <title>
+         Chai Reward Model Training
+        
+    </title>
+
+        
+            <meta property="og:title" content="Chai Reward Model Training" />
+        
+     
+
+     
+         
+     
+
+     
+         
+    
+
+    
+    
+        <link rel="icon" type="image/png" href=&#x2F;icon&#x2F;favicon.png />
+    
+
+    
+    
+        <link href=https://goddard.blog/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+
+    
+        
+            <script>
+            MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+              }
+            };
+            </script>
+        
+        <script type="text/javascript" id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+    
+
+    
+    <link rel="alternate" type="application/atom+xml" title="" href="https://goddard.blog/atom.xml">
+
+
+    
+    
+        <link rel="stylesheet" type="text/css" href=https://goddard.blog/theme/light.css />
+        <link id="darkModeStyle" rel="stylesheet" type="text/css" href="https://goddard.blog/theme/dark.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="screen" href=https://goddard.blog/main.css />
+
+    
+
+    <script src=https://goddard.blog/js/feather.min.js></script>
+</head>
+
+<body>
+    <div class="content">
+        <header>
+    <div class="main">
+        <a href=https:&#x2F;&#x2F;goddard.blog></a>
+
+        
+        <div class="socials">
+            
+            <a rel="me" href="https:&#x2F;&#x2F;github.com&#x2F;cg123&#x2F;" class="social">
+                <img alt=github src="/social_icons/github.svg">
+            </a>
+            
+        </div>
+        
+    </div>
+
+    <nav>
+        
+            <a href=&#x2F;posts style="margin-left: 0.7em">&#x2F;posts</a>
+        
+            <a href=&#x2F;about style="margin-left: 0.7em">&#x2F;about</a>
+        
+    </nav>
+
+    
+    <nav>
+        <a id="dark-mode-toggle" onclick="toggleTheme()" href=""></a>
+        <script src=https://goddard.blog/js/themetoggle.js></script>
+    </nav>
+    
+</header>
+
+        
+        
+    
+<main>
+    <article>
+        <div class="title">
+            
+            
+    <div class="page-header">
+        Chai Reward Model Training
+    </div>
+
+
+                <div class="meta">
+                    
+                        Posted on <time>2023-10-12</time>
+                    
+
+                    
+                </div>
+                
+
+        
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/training/">#training</a>&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/reward-model/">#reward-model</a></span>
+    
+        </div>
+
+        
+
+        
+        
+            
+                <h1>Table of Contents</h1>
+                <ul>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/chai-reward-model/#base-model">Base Model</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/chai-reward-model/#training">Training</a>
+                        
+                    </li>
+                
+                </ul>
+            
+        
+
+        <section class="body">
+            <p><a href="https://chai-research.com/">Chai Research</a> is holding a neat little large language model competition. This season they've introduced the ability to package a reward model with your submission, to be used with best-of-4 sampling. Looks like there haven't been any custom models submitted yet though.</p>
+<p>Let's train a reward model! Really quickly. Go go go.</p>
+<h1 id="base-model">Base Model</h1>
+<p>We can use either gpt2 or Phi as the base for our reward model. Phi is definitely more capable, but larger and slower both to train and to evaluate. Well phooey to that. I'm going to go the opposite direction, and train an <em>even smaller</em> reward model. I can't afford 137M parameters in this economy. Let's chop a few layers off of gpt2 and start from there.</p>
+<p>Let's pop open <a href="https://github.com/cg123/mergekit.git">mergekit</a> and make the aerodynamic, streamlined base model of our dreams. A nice, simple config:</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">slices</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">sources</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">model</span><span>: </span><span style="color:#a3be8c;">gpt2
+</span><span>      </span><span style="color:#bf616a;">layer_range</span><span>: [</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">8</span><span>]
+</span><span style="color:#bf616a;">merge_method</span><span>: </span><span style="color:#a3be8c;">passthrough
+</span><span style="color:#bf616a;">dtype</span><span>: </span><span style="color:#a3be8c;">float16
+</span></code></pre>
+<pre data-lang="sh" style="background-color:#2b303b;color:#c0c5ce;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#bf616a;">mergekit-yml</span><span> gpt2-small.yml ./gpt2-small
+</span></code></pre>
+<p>And now we have <code>gpt2-small</code>, weighing in at 96M parameters. Much better!</p>
+<h1 id="training">Training</h1>
+<p>Now it's time to cram a whole bunch of data in there. Chai has provided a nice <a href="https://huggingface.com/ChaiML/20231012_chai_prize_reward_model_data">dataset</a> of real feedback from their users, which will serve us just fine. It's a little unusual in that it provides a binary 'thumbs up'/'thumbs down' label on single conversations, as opposed to the accept/reject pair used in typical RLHF schemes. That just means we can approach this as simple sequence classification instead of a pairwise rating objective.</p>
+<p>Let's crank out a tiny bit of code to get <code>transformers.Trainer</code> to work for us:</p>
+<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#b48ead;">import </span><span>transformers, datasets
+</span><span>
+</span><span>model = transformers.AutoModelForSequenceClassification.</span><span style="color:#bf616a;">from_pretrained</span><span>(&quot;</span><span style="color:#a3be8c;">./gpt2-small</span><span>&quot;)
+</span><span>tokenizer = transformers.AutoTokenizer.</span><span style="color:#bf616a;">from_pretrained</span><span>(&quot;</span><span style="color:#a3be8c;">gpt2</span><span>&quot;)
+</span><span>tokenizer.truncation_side = &quot;</span><span style="color:#a3be8c;">right</span><span>&quot;
+</span><span>tokenizer.pad_token = tokenizer.eos_token
+</span><span>model.config.pad_token_id = tokenizer.pad_token_id  </span><span style="color:#65737e;"># nice! super elegant, love that we need this
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">prepare_row</span><span>(</span><span style="color:#bf616a;">row</span><span>):
+</span><span>    tokenized = </span><span style="color:#bf616a;">tokenizer</span><span>(
+</span><span>        row[&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;],
+</span><span>        </span><span style="color:#bf616a;">padding</span><span>=</span><span style="color:#d08770;">True</span><span>,
+</span><span>        </span><span style="color:#bf616a;">max_length</span><span>=model.config.n_positions,
+</span><span>        </span><span style="color:#bf616a;">truncation</span><span>=</span><span style="color:#d08770;">True</span><span>,
+</span><span>    )
+</span><span>    </span><span style="color:#b48ead;">return </span><span>{
+</span><span>        &quot;</span><span style="color:#a3be8c;">input_ids</span><span>&quot;: tokenized[&quot;</span><span style="color:#a3be8c;">input_ids</span><span>&quot;],
+</span><span>        &quot;</span><span style="color:#a3be8c;">attention_mask</span><span>&quot;: tokenized[&quot;</span><span style="color:#a3be8c;">attention_mask</span><span>&quot;],
+</span><span>        &quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;: row[&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;],
+</span><span>    }
+</span><span>
+</span><span>ds = datasets.</span><span style="color:#bf616a;">load_dataset</span><span>(&quot;</span><span style="color:#a3be8c;">ChaiML/20231012_chai_prize_reward_model_data</span><span>&quot;)[&quot;</span><span style="color:#a3be8c;">train</span><span>&quot;]
+</span><span>ds = ds.</span><span style="color:#bf616a;">map</span><span>(prepare_row)
+</span></code></pre>
+<p>Great! Now we can train the model. For finding optimal hyperparameters, I used the well-known &quot;gut feeling&quot; theorem. My finely-honed instincts informed me that eight is a nice number, 1e-4 is pretty safe usually, and one epoch sounds like plenty of waiting. Go go go.</p>
+<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span>train_args = transformers.</span><span style="color:#bf616a;">TrainingArguments</span><span>(
+</span><span>    </span><span style="color:#bf616a;">output_dir</span><span>=&quot;</span><span style="color:#a3be8c;">reward-model-out</span><span>&quot;,
+</span><span>    </span><span style="color:#bf616a;">per_device_train_batch_size</span><span>=</span><span style="color:#d08770;">8</span><span>,
+</span><span>    </span><span style="color:#bf616a;">per_device_eval_batch_size</span><span>=</span><span style="color:#d08770;">8</span><span>,
+</span><span>    </span><span style="color:#bf616a;">bf16</span><span>=</span><span style="color:#d08770;">True</span><span>,
+</span><span>    </span><span style="color:#bf616a;">lr_scheduler_type</span><span>=&quot;</span><span style="color:#a3be8c;">cosine</span><span>&quot;,
+</span><span>    </span><span style="color:#bf616a;">optim</span><span>=&quot;</span><span style="color:#a3be8c;">adamw_torch_fused</span><span>&quot;,
+</span><span>    </span><span style="color:#bf616a;">learning_rate</span><span>=</span><span style="color:#d08770;">0.0001</span><span>,
+</span><span>    </span><span style="color:#bf616a;">report_to</span><span>=&quot;</span><span style="color:#a3be8c;">wandb</span><span>&quot;,
+</span><span>    </span><span style="color:#bf616a;">logging_steps</span><span>=</span><span style="color:#d08770;">1</span><span>,
+</span><span>    </span><span style="color:#bf616a;">num_train_epochs</span><span>=</span><span style="color:#d08770;">1</span><span>,
+</span><span>)
+</span><span>
+</span><span>trainer = transformers.</span><span style="color:#bf616a;">Trainer</span><span>(
+</span><span>    model,
+</span><span>    </span><span style="color:#bf616a;">args</span><span>=train_args,
+</span><span>    </span><span style="color:#bf616a;">tokenizer</span><span>=tokenizer,
+</span><span>    </span><span style="color:#bf616a;">train_dataset</span><span>=ds,
+</span><span>)
+</span><span>trainer.</span><span style="color:#bf616a;">train</span><span>()
+</span></code></pre>
+<p>Turns out a batch size of 8 fits quite nicely on a 3090. Some 45 minutes later, we have a trained model. Let's see how it does!</p>
+<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">good_prob</span><span>(</span><span style="color:#bf616a;">example</span><span>: str):
+</span><span>    </span><span style="color:#b48ead;">with </span><span>torch.</span><span style="color:#bf616a;">no_grad</span><span>():
+</span><span>        input_ids = </span><span style="color:#bf616a;">tokenizer</span><span>(example, </span><span style="color:#bf616a;">return_tensors</span><span>=&quot;</span><span style="color:#a3be8c;">pt</span><span>&quot;)[&quot;</span><span style="color:#a3be8c;">input_ids</span><span>&quot;]
+</span><span>        logits = </span><span style="color:#bf616a;">model</span><span>(input_ids.</span><span style="color:#bf616a;">to</span><span>(model.device))[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">softmax</span><span>(-</span><span style="color:#d08770;">1</span><span>)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>logits[</span><span style="color:#d08770;">...</span><span>, </span><span style="color:#d08770;">1</span><span>]
+</span></code></pre>
+<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">good_prob</span><span>(ds[</span><span style="color:#d08770;">0</span><span>][&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;]), ds[</span><span style="color:#d08770;">0</span><span>][&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;]
+</span><span>(</span><span style="color:#bf616a;">tensor</span><span>([</span><span style="color:#d08770;">0.4884</span><span>], </span><span style="color:#bf616a;">device</span><span>=&#39;</span><span style="color:#a3be8c;">cuda:0</span><span>&#39;), </span><span style="color:#d08770;">0</span><span>)
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">good_prob</span><span>(ds[</span><span style="color:#d08770;">1</span><span>][&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;]), ds[</span><span style="color:#d08770;">1</span><span>][&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;]
+</span><span>(</span><span style="color:#bf616a;">tensor</span><span>([</span><span style="color:#d08770;">0.5567</span><span>], </span><span style="color:#bf616a;">device</span><span>=&#39;</span><span style="color:#a3be8c;">cuda:0</span><span>&#39;), </span><span style="color:#d08770;">1</span><span>)
+</span></code></pre>
+<p>Alright, that's two points that are on the correct side of average! And two points make a line. That line's slope? Success.</p>
+
+        </section>
+    </article>
+</main>
+
+
+    </div>
+</body>
+
+</html>
