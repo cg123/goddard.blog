@@ -203,6 +203,11 @@
 </span><span>ds = datasets.</span><span style="color:#bf616a;">load_dataset</span><span>(&quot;</span><span style="color:#a3be8c;">ChaiML/20231012_chai_prize_reward_model_data</span><span>&quot;)[&quot;</span><span style="color:#a3be8c;">train</span><span>&quot;]
 </span><span>ds = ds.</span><span style="color:#bf616a;">map</span><span>(prepare_row)
 </span></code></pre>
+<p>And for the sake of propriety, let's put aside an evaluation split as well:</p>
+<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span>splits = ds.</span><span style="color:#bf616a;">train_test_split</span><span>(</span><span style="color:#bf616a;">test_size</span><span>=</span><span style="color:#d08770;">0.01</span><span>)
+</span><span>ds_train = splits[&quot;</span><span style="color:#a3be8c;">train</span><span>&quot;]
+</span><span>ds_eval = splits[&quot;</span><span style="color:#a3be8c;">test</span><span>&quot;]
+</span></code></pre>
 <p>Great! Now we can train the model. For finding optimal hyperparameters, I used the well-known &quot;gut feeling&quot; theorem. My finely-honed instincts informed me that eight is a nice number, 1e-4 is pretty safe usually, and one epoch sounds like plenty of waiting. Go go go.</p>
 <pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span>train_args = transformers.</span><span style="color:#bf616a;">TrainingArguments</span><span>(
 </span><span>    </span><span style="color:#bf616a;">output_dir</span><span>=&quot;</span><span style="color:#a3be8c;">reward-model-out</span><span>&quot;,
@@ -221,7 +226,7 @@
 </span><span>    model,
 </span><span>    </span><span style="color:#bf616a;">args</span><span>=train_args,
 </span><span>    </span><span style="color:#bf616a;">tokenizer</span><span>=tokenizer,
-</span><span>    </span><span style="color:#bf616a;">train_dataset</span><span>=ds,
+</span><span>    </span><span style="color:#bf616a;">train_dataset</span><span>=ds_train,
 </span><span>)
 </span><span>trainer.</span><span style="color:#bf616a;">train</span><span>()
 </span></code></pre>
@@ -232,9 +237,9 @@
 </span><span>        logits = </span><span style="color:#bf616a;">model</span><span>(input_ids.</span><span style="color:#bf616a;">to</span><span>(model.device))[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">softmax</span><span>(-</span><span style="color:#d08770;">1</span><span>)
 </span><span>    </span><span style="color:#b48ead;">return </span><span>logits[</span><span style="color:#d08770;">...</span><span>, </span><span style="color:#d08770;">1</span><span>]
 </span></code></pre>
-<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">good_prob</span><span>(ds[</span><span style="color:#d08770;">0</span><span>][&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;]), ds[</span><span style="color:#d08770;">0</span><span>][&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;]
+<pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">good_prob</span><span>(ds_eval[</span><span style="color:#d08770;">0</span><span>][&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;]), ds[</span><span style="color:#d08770;">0</span><span>][&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;]
 </span><span>(</span><span style="color:#bf616a;">tensor</span><span>([</span><span style="color:#d08770;">0.4884</span><span>], </span><span style="color:#bf616a;">device</span><span>=&#39;</span><span style="color:#a3be8c;">cuda:0</span><span>&#39;), </span><span style="color:#d08770;">0</span><span>)
-</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">good_prob</span><span>(ds[</span><span style="color:#d08770;">1</span><span>][&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;]), ds[</span><span style="color:#d08770;">1</span><span>][&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;]
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">good_prob</span><span>(ds_eval[</span><span style="color:#d08770;">1</span><span>][&quot;</span><span style="color:#a3be8c;">input_text</span><span>&quot;]), ds[</span><span style="color:#d08770;">1</span><span>][&quot;</span><span style="color:#a3be8c;">labels</span><span>&quot;]
 </span><span>(</span><span style="color:#bf616a;">tensor</span><span>([</span><span style="color:#d08770;">0.5567</span><span>], </span><span style="color:#bf616a;">device</span><span>=&#39;</span><span style="color:#a3be8c;">cuda:0</span><span>&#39;), </span><span style="color:#d08770;">1</span><span>)
 </span></code></pre>
 <p>Alright, that's two points that are on the correct side of average! And two points make a line. That line's slope? Success.</p>
