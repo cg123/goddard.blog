@@ -20,6 +20,10 @@ def tokenize_fun(tokenizer: transformers.PreTrainedTokenizerBase, max_length: in
         }
 
     def f(row):
+        if "prompt" in row:
+            row["chosen"] = row["prompt"] + row["chosen"]
+            row["rejected"] = row["prompt"] + row["rejected"]
+
         if "chosen" in row:
             res = {}
             res.update(do_tok("chosen", row, "_chosen"))
@@ -34,6 +38,7 @@ def tokenize_fun(tokenizer: transformers.PreTrainedTokenizerBase, max_length: in
 def main(
     model_path: str,
     dataset: str,
+    ds_config: Optional[str] = None,
     out_path: str = "reward-model-out",
     use_trl: bool = False,
     micro_batch_size: int = 8,
@@ -53,7 +58,7 @@ def main(
         model.config.pad_token_id = tokenizer.pad_token_id
     print(tokenizer.special_tokens_map)
 
-    ds = datasets.load_dataset(dataset)
+    ds = datasets.load_dataset(dataset, name=ds_config)
     if "train" in ds:
         ds = ds["train"]
 
@@ -76,6 +81,7 @@ def main(
         bf16=True,
         lr_scheduler_type="cosine",
         optim="adamw_torch_fused",
+        warmup_steps=10,
         learning_rate=lr,
         seed=seed,
         evaluation_strategy="steps" if ds_e is not None else "no",
@@ -96,6 +102,7 @@ def main(
         eval_dataset=ds_e,
     )
     trainer.train()
+    model.save_pretrained(out_path, safe_serialization=True)
 
 
 if __name__ == "__main__":
