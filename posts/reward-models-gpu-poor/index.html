@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+
+    
+    
+    
+    <title>
+         Reward Models: Alignment for the GPU Poor
+        
+    </title>
+
+        
+            <meta property="og:title" content="Reward Models: Alignment for the GPU Poor" />
+        
+     
+
+     
+         
+     
+
+     
+         
+    
+
+    
+    
+        <link rel="icon" type="image/png" href=&#x2F;icon&#x2F;favicon.png />
+    
+
+    
+    
+        <link href=https://goddard.blog/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+
+    
+        
+            <script>
+            MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+              }
+            };
+            </script>
+        
+        <script type="text/javascript" id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+    
+
+    
+    <link rel="alternate" type="application/atom+xml" title="" href="https://goddard.blog/atom.xml">
+
+
+    
+    
+        <link rel="stylesheet" type="text/css" href=https://goddard.blog/theme/light.css />
+        <link id="darkModeStyle" rel="stylesheet" type="text/css" href="https://goddard.blog/theme/dark.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="screen" href=https://goddard.blog/main.css />
+
+    
+
+    <script src=https://goddard.blog/js/feather.min.js></script>
+</head>
+
+<body>
+    <div class="content">
+        <header>
+    <div class="main">
+        <a href=https:&#x2F;&#x2F;goddard.blog></a>
+
+        
+        <div class="socials">
+            
+            <a rel="me" href="https:&#x2F;&#x2F;github.com&#x2F;cg123&#x2F;" class="social">
+                <img alt=github src="/social_icons/github.svg">
+            </a>
+            
+        </div>
+        
+    </div>
+
+    <nav>
+        
+            <a href=&#x2F;posts style="margin-left: 0.7em">&#x2F;posts</a>
+        
+            <a href=&#x2F;about style="margin-left: 0.7em">&#x2F;about</a>
+        
+    </nav>
+
+    
+    <nav>
+        <a id="dark-mode-toggle" onclick="toggleTheme()" href=""></a>
+        <script src=https://goddard.blog/js/themetoggle.js></script>
+    </nav>
+    
+</header>
+
+        
+        
+    
+<main>
+    <article>
+        <div class="title">
+            
+            
+    <div class="page-header">
+        Reward Models: Alignment for the GPU Poor
+    </div>
+
+
+                <div class="meta">
+                    
+                        Posted on <time>2023-10-16</time>
+                    
+
+                    
+                </div>
+                
+
+        
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/alignment/">#alignment</a>&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/reward-model/">#reward-model</a></span>
+    
+        </div>
+
+        
+
+        
+        
+            
+                <h1>Table of Contents</h1>
+                <ul>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#intro">Intro</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#what-s-a-reward-model">What&#x27;s a Reward Model??</a>
+                        
+                            <ul>
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#base-model-selection">Base Model Selection</a>
+                                    </li>
+
+                                    
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#data">Data</a>
+                                    </li>
+
+                                    
+                                
+                            </ul>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#reward-model-training">Reward Model Training</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#evaluation">Evaluation</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#best-of-n-sampling">Best-of-N Sampling</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/reward-models-gpu-poor/#conclusion">Conclusion</a>
+                        
+                    </li>
+                
+                </ul>
+            
+        
+
+        <section class="body">
+            <h2 id="intro">Intro</h2>
+<p>When you think about alignment, you probably think about sentences beginning with phrases like &quot;I'm sorry, but&quot; or &quot;As a large language model.&quot; But it's a whole lot more than that! Alignment is about bringing AI systems in line with human goals and preferences. Let's talk about alignment from a perspective that pretty much everybody agrees on: how can we get large language models to <em>actually do the thing we want</em>, and do it in a <em>way</em> we like?</p>
+<p>The go-to tool for this right now is Reinforcement Learning with Human Feedback, or RLHF. The basic approach is to collect a big ol' pile of human feedback data, train a reward model to predict that data, and then train your language model to maximize the reward for its responses. That's a whole lot of work though. We can take a bit of a shortcut and get some of the same benefits by just training a reward model and using best-of-n sampling at runtime.</p>
+<p><a href="https://chai-research.com/">Chai Research</a> is holding a neat little large language model competition. This season they've introduced the ability to package a reward model with your submission, to be used with best-of-4 sampling. How convenient! Let's train one and give it a whirl.</p>
+<h2 id="what-s-a-reward-model">What's a Reward Model??</h2>
+<p>The goal of a reward model is simple. It should take in a prospective model output and give us a scalar that tells us how good a human would think the response is. We don't necessarily care about the specific scalar value. What we do care about is that for any two responses the one humans like better should give a larger reward.</p>
+<p>For example, consider the two options below:</p>
+<ol>
+<li><code>Best Friend Steve: Hey it's me, your best friend.</code></li>
+<li><code>Best Friend Steve: I am at best apathetic towards your presence.</code></li>
+</ol>
+<p>The reward for either of them could be zero, or 0.3, or seven, who cares! As long as the reward for #1 is greater than #2, the reward model is correct. (Or maybe you'd prefer it the other way around. That's fine too, you're the human.)</p>
+<p>This aligns quite well with the data generally available - the most common format for human feedback data is a pair of two responses, one of which was chosen by the user as &quot;better&quot; and one of which was rejected. This makes training fairly simple with a pairwise objective.</p>
+<p>Reward models are generally fine-tuned versions of a foundational language model, and there's plenty of choices to be made there. Let's talk about that next.</p>
+<h3 id="base-model-selection">Base Model Selection</h3>
+<p>There are a few architectures that we can use and each come in a variety of sizes. <code>roberta</code>, <code>deberta</code>, <code>gpt2</code>, <code>gpt-neox</code>, and basically any model that works with <code>AutoModelForSequenceClassification</code> would work for our needs<sup class="footnote-reference"><a href="#fn-phi">1</a></sup>. They all have strengths and weaknesses and there's pretty much no wrong choice. I'm going to go with <code>gpt2</code> because it's small and I know how to fine tune it pretty well. But feel free to let your creative spirit soar.</p>
+<p>As far as size goes, there's an obvious tradeoff to be made. The more parameters your model has the more capable it can potentially be. It will also be slower both to train and to evaluate. I'm going to go hard in the opposite direction and train a model <em>even smaller</em> than base <code>gpt2</code>. Who can afford 137M parameters in this economy?</p>
+<p>Let's pop open <a href="https://github.com/cg123/mergekit.git">mergekit</a> and make the aerodynamic, streamlined base model of our dreams. Taking the first eight layers should give us decent enough features to work with:</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">slices</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">sources</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">model</span><span>: </span><span style="color:#a3be8c;">gpt2
+</span><span>      </span><span style="color:#bf616a;">layer_range</span><span>: [</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">8</span><span>]
+</span><span style="color:#bf616a;">merge_method</span><span>: </span><span style="color:#a3be8c;">passthrough
+</span><span style="color:#bf616a;">dtype</span><span>: </span><span style="color:#a3be8c;">float16
+</span></code></pre>
+<pre data-lang="sh" style="background-color:#2b303b;color:#c0c5ce;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#bf616a;">mergekit-yaml</span><span> gpt2-small.yml ./gpt2-small
+</span></code></pre>
+<p>And now we have <code>gpt2-small</code>, weighing in at 96M parameters. Much better! Now let's talk about dataset choices.</p>
+<h3 id="data">Data</h3>
+<p>Chai has provided a nice <a href="https://huggingface.co/datasets/ChaiML/20231012_chai_prize_reward_model_data">competition dataset</a> of real feedback from their users. It provides a thumbs up/thumbs down response to each conversation. This will work just fine with a binary classification objective, and is a good source of signal for how coherent responses are and how well they adhere to the characters the model is playing.</p>
+<p>Using their metadata I put together a <a href="https://huggingface.co/datasets/chargoddard/chai-feedback-pairs">dataset</a> that groups positive and negative conversations with the same bot for use with a pairwise objective. This is more or less the same data as the previous set, but the pairs provide a little more structure that a model can learn from.</p>
+<p>There is also lots of external data available like Anthropic's <a href="https://huggingface.co/datasets/Anthropic/hh-rlhf">hh-rlhf</a>. We can give that a whirl as well, though it leans heavily in the direction of harmlessness over helpfulness.</p>
+<p>And of course, you can always bring your own data! If there's a specific result you want this will almost always give you the best results. It's a lot of work though.</p>
+<p>All of these datasets are great choices! So let's do all of them.</p>
+<h2 id="reward-model-training">Reward Model Training</h2>
+<p>You may have noticed that these datasets don't all have the same format or objective function. How am I going to rectify this, you ask? Simple! I'm going to train a bunch of different models and smash them together. Every model should be a model soup.</p>
+<p>First let's train a classifier on Chai's provided dataset. It has binary labels attached to single examples so we'll use the <a href="https://github.com/huggingface/transformers/tree/main/examples/pytorch/text-classification">text classification example scripts</a> from <code>transformers</code>. Tweak parameters to fit your setup - these ran well on an RTX 3090:</p>
+<pre data-lang="sh" style="background-color:#2b303b;color:#c0c5ce;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#bf616a;">python</span><span> run_classification.py \
+</span><span style="color:#bf616a;">    --model_name_or_path</span><span> ./gpt2-small \
+</span><span style="color:#bf616a;">    --dataset_name</span><span> ChaiML/20231012_chai_prize_reward_model_data \
+</span><span style="color:#bf616a;">    --shuffle_train_dataset </span><span>\
+</span><span style="color:#bf616a;">    --metric_name</span><span> accuracy \
+</span><span style="color:#bf616a;">    --text_column_name</span><span> input_text \
+</span><span style="color:#bf616a;">    --label_column_name</span><span> labels \
+</span><span style="color:#bf616a;">    --do_train </span><span>\
+</span><span style="color:#bf616a;">    --max_seq_length</span><span> 1024 \
+</span><span style="color:#bf616a;">    --per_device_train_batch_size</span><span> 8 \
+</span><span style="color:#bf616a;">    --learning_rate</span><span> 1e-6 \
+</span><span style="color:#bf616a;">    --num_train_epochs</span><span> 4 \
+</span><span style="color:#bf616a;">    --output_dir</span><span> ./gpt2-small-chai-thumbsup
+</span></code></pre>
+<p>This is a pretty quick train. It took around an hour for me but you could even cut down to a single epoch and crank up the learning rate if you're super impatient.</p>
+<p>And then for our two pairwise datasets, HuggingFace's <code>trl</code> library has us covered with a convenient <a href="https://huggingface.co/docs/trl/reward_trainer"><code>RewardTrainer</code></a> api plus an <a href="https://github.com/huggingface/trl/blob/main/examples/scripts/reward_modeling.py">example script</a>.</p>
+<pre data-lang="sh" style="background-color:#2b303b;color:#c0c5ce;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#bf616a;">python</span><span> reward_modeling.py \
+</span><span style="color:#bf616a;">    --model-name</span><span> ./gpt2-small \
+</span><span style="color:#bf616a;">    --dataset-name</span><span> chargoddard/chai-feedback-pairs \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.per-device-train-batch-size 8 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.learning-rate 1e-6 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.num-train-epochs 4 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.max-length 1024 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.output-dir ./gpt2-small-chai-feedbackpairs
+</span><span>
+</span><span style="color:#bf616a;">python</span><span> reward_modeling.py \
+</span><span style="color:#bf616a;">    --model-name</span><span> ./gpt2-small \
+</span><span style="color:#bf616a;">    --dataset-name</span><span> Anthropic/hh-rlhf \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.per-device-train-batch-size 8 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.learning-rate 1e-6 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.num-train-epochs 4 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.max-length 1024 \
+</span><span style="color:#bf616a;">    --reward-config</span><span>.output-dir ./gpt2-small-hh-rlhf
+</span></code></pre>
+<p>Once those are all trained, let's go ahead and smack 'em together. Mergekit comes in handy again here. I chose the <code>ties</code> merge method with density 1 because I think using task vectors will be appropriate but am skeptical that such small models can be effectively sparsified. My config file for the merge:</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">models</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">model</span><span>: </span><span style="color:#a3be8c;">./gpt2-small
+</span><span>  - </span><span style="color:#bf616a;">model</span><span>: </span><span style="color:#a3be8c;">./gpt2-small-chai-thumbsup
+</span><span>    </span><span style="color:#bf616a;">parameters</span><span>:
+</span><span>      </span><span style="color:#bf616a;">weight</span><span>: </span><span style="color:#d08770;">0.5
+</span><span>  - </span><span style="color:#bf616a;">model</span><span>: </span><span style="color:#a3be8c;">./gpt2-small-chai-feedbackpairs
+</span><span>    </span><span style="color:#bf616a;">parameters</span><span>:
+</span><span>      </span><span style="color:#bf616a;">weight</span><span>: </span><span style="color:#d08770;">0.6
+</span><span>  - </span><span style="color:#bf616a;">model</span><span>: </span><span style="color:#a3be8c;">./gpt2-small-hh-rlhf
+</span><span>    </span><span style="color:#bf616a;">parameters</span><span>:
+</span><span>      </span><span style="color:#bf616a;">weight</span><span>: </span><span style="color:#d08770;">0.05 </span><span style="color:#65737e;"># salt-sprinkle.gif
+</span><span style="color:#bf616a;">merge_method</span><span>: </span><span style="color:#a3be8c;">ties
+</span><span style="color:#bf616a;">dtype</span><span>: </span><span style="color:#a3be8c;">float16
+</span><span style="color:#bf616a;">parameters</span><span>:
+</span><span>    </span><span style="color:#bf616a;">density</span><span>: </span><span style="color:#d08770;">1.0
+</span></code></pre>
+<pre data-lang="sh" style="background-color:#2b303b;color:#c0c5ce;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#bf616a;">mergekit-yaml</span><span> rewardblend.yml ./gpt2-small-chai-multiobjective
+</span></code></pre>
+<p>And there it is! One model that should have pretty decent performance on each of our datasets.</p>
+<h2 id="evaluation">Evaluation</h2>
+<p>Now that we have our reward model, let's give it a try before we submit it. Accuracy scores on evaluation splits are a great thing to check. When doing merges like this you should aim to see only a couple percent performance loss on the tasks the individual models were trained on (or even a gain if there are synergistic effects.) If you see results much worse than that definitely play with the weights, densities, and merge method until you get results you're satisfied with.</p>
+<p>Let's also look at some specific examples to see if the model behaves as we intuitively expect it to.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>&gt;&gt;&gt; p = transformers.</span><span style="color:#bf616a;">pipeline</span><span>(&quot;</span><span style="color:#a3be8c;">text-classification</span><span>&quot;, </span><span style="color:#bf616a;">model</span><span>=&quot;</span><span style="color:#a3be8c;">.</span><span>&quot;, </span><span style="color:#bf616a;">device</span><span>=&quot;</span><span style="color:#a3be8c;">cuda</span><span>&quot;, </span><span style="color:#bf616a;">top_k</span><span>=</span><span style="color:#d08770;">None</span><span>)
+</span><span>&gt;&gt;&gt; </span><span style="background-color:#bf616a;color:#2b303b;">def</span><span> </span><span style="color:#bf616a;">scalar_score</span><span>(text: str) -&gt; float:
+</span><span style="color:#d08770;">...     </span><span style="color:#65737e;"># helper to get score from classifier
+</span><span style="color:#d08770;">...     </span><span style="color:#b48ead;">for </span><span>row </span><span style="color:#b48ead;">in </span><span style="color:#bf616a;">p</span><span>(text)[</span><span style="color:#d08770;">0</span><span>]:
+</span><span style="color:#d08770;">...         </span><span style="color:#b48ead;">if </span><span>p.model.config.label2id[row[&quot;</span><span style="color:#a3be8c;">label</span><span>&quot;]] == </span><span style="color:#d08770;">1</span><span>:
+</span><span style="color:#d08770;">...             </span><span style="color:#b48ead;">return </span><span>row[&quot;</span><span style="color:#a3be8c;">score</span><span>&quot;]
+</span><span style="color:#d08770;">...
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">scalar_score</span><span>(&quot;</span><span style="color:#a3be8c;">Best Friend Steve: Hey it&#39;s me, your best friend.</span><span>&quot;) </span><span style="color:#65737e;"># good! :)
+</span><span style="color:#d08770;">0.3594720661640167
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">scalar_score</span><span>(&quot;</span><span style="color:#a3be8c;">Best Friend Steve: I am at best apathetic towards your presence.</span><span>&quot;) </span><span style="color:#65737e;"># bad. :(
+</span><span style="color:#d08770;">0.2099285125732422
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">scalar_score</span><span>(&quot;</span><span style="color:#a3be8c;">Jenna Maroney: No you don&#39;t, Oprah.</span><span>&quot;)
+</span><span style="color:#d08770;">0.27791348099708557
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">scalar_score</span><span>(&quot;</span><span style="color:#a3be8c;">Jenna Maroney: I understand the improv scene I am participating in and that I should play Oprah.</span><span>&quot;) </span><span style="color:#65737e;"># wildly OOC
+</span><span style="color:#d08770;">0.24152445793151855
+</span></code></pre>
+<p>Perfect! I'd call the reward model good to go. Let's talk a little about how it will be used and then we can call this a wrap.</p>
+<h2 id="best-of-n-sampling">Best-of-N Sampling</h2>
+<p>When submitted to the Chai competition, the reward model will be used for best-of-4 sampling. This is a very simple but effective technique to get the benefits of a trained reward model without going through the (unstable and tricky) PPO training that RLHF calls for. Instead of generating a response and immediately presenting it to the user, four different responses will be generated and the one that gets the highest reward score will be delivered. Simple! Easy! A bit slow if you don't have a fleet of cloud GPUs able to take up the extra processing load. But Chai has that, so it's great in the context of the competition.</p>
+<p>Best-of-n sampling can be used for local generation as well but the additional latency is a definite drawback. I think there's a lot of potential for use cases like synthetic dataset generation. There's probably a very interesting experiment in generating a training dataset in the style of <a href="https://arxiv.org/abs/2212.09689">Unnatural Instructions</a> with best-of-n sampling, training a model on it, and repeating to see if there is improvement after the first iteration. I bet you could also train a reward model to re-align outputs from a model like ChatGPT, though it would be brutal on your API costs.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Reward models are neat and useful, and you can make one at home with store-bought ingredients. Alignment of local models can be alignment to <em>your</em> goals and values. Seize the future! Get weird and experiment.</p>
+<hr />
+<div class="footnote-definition" id="fn-phi"><sup class="footnote-definition-label">1</sup>
+<p>In the first pass of this post I mistakenly thought Phi would be accepted, but as it is not integrated into Transformers it is not useable for this competition. For non-competition uses pretty much anything goes.</p>
+</div>
+
+        </section>
+    </article>
+</main>
+
+
+    </div>
+</body>
+
+</html>

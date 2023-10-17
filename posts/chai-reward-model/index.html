@@ -161,9 +161,12 @@
         
 
         <section class="body">
-            <p><a href="https://chai-research.com/">Chai Research</a> is holding a neat little large language model competition. This season they've introduced the ability to package a reward model with your submission, to be used with best-of-4 sampling. Looks like there haven't been any custom models submitted yet though.</p>
+            <p>This is the initial draft of <a href="https://goddard.blog/posts/reward-models-gpu-poor/">Reward Models for the GPU Poor</a>, written in under an hour to capitalize on a bounty. You'll probably find the rewritten version more helpful but this might be good for a laugh.</p>
+<br />
+<br />
+<p><a href="https://chai-research.com/">Chai Research</a> is holding a neat little large language model competition. This season they've introduced the ability to package a reward model with your submission, to be used with best-of-4 sampling. Looks like there haven't been any custom models submitted yet though.</p>
 <p>Let's train a reward model! Really quickly. Go go go.</p>
-<h1 id="base-model">Base Model</h1>
+<h2 id="base-model">Base Model</h2>
 <p>We can use either gpt2 or Phi as the base for our reward model. Phi is definitely more capable, but larger and slower both to train and to evaluate. Well phooey to that. I'm going to go the opposite direction, and train an <em>even smaller</em> reward model. I can't afford 137M parameters in this economy. Let's chop a few layers off of gpt2 and start from there.</p>
 <p>Let's pop open <a href="https://github.com/cg123/mergekit.git">mergekit</a> and make the aerodynamic, streamlined base model of our dreams. A nice, simple config:</p>
 <pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">slices</span><span>:
@@ -176,7 +179,7 @@
 <pre data-lang="sh" style="background-color:#2b303b;color:#c0c5ce;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#bf616a;">mergekit-yml</span><span> gpt2-small.yml ./gpt2-small
 </span></code></pre>
 <p>And now we have <code>gpt2-small</code>, weighing in at 96M parameters. Much better!</p>
-<h1 id="training">Training</h1>
+<h2 id="training">Training</h2>
 <p>Now it's time to cram a whole bunch of data in there. Chai has provided a nice <a href="https://huggingface.co/datasets/ChaiML/20231012_chai_prize_reward_model_data">dataset</a> of real feedback from their users, which will serve us just fine. It's a little unusual in that it provides a binary 'thumbs up'/'thumbs down' label on single conversations, as opposed to the accept/reject pair used in typical RLHF schemes. That just means we can approach this as simple sequence classification instead of a pairwise rating objective.</p>
 <p>Let's crank out a tiny bit of code to get <code>transformers.Trainer</code> to work for us:</p>
 <pre data-lang="py" style="background-color:#2b303b;color:#c0c5ce;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#b48ead;">import </span><span>transformers, datasets
