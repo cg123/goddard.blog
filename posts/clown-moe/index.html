@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+
+    
+    
+    
+    <title>
+         Mixture of Experts for Clowns (at a Circus)
+        
+    </title>
+
+        
+            <meta property="og:title" content="Mixture of Experts for Clowns (at a Circus)" />
+        
+     
+
+     
+         
+     
+
+     
+         
+    
+
+    
+    
+        <link rel="icon" type="image/png" href=&#x2F;icon&#x2F;favicon.png />
+    
+
+    
+    
+        <link href=https://goddard.blog/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+
+    
+        
+            <script>
+            MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+              }
+            };
+            </script>
+        
+        <script type="text/javascript" id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+    
+
+    
+    <link rel="alternate" type="application/atom+xml" title="" href="https://goddard.blog/atom.xml">
+
+
+    
+    
+        <link rel="stylesheet" type="text/css" href=https://goddard.blog/theme/light.css />
+        <link id="darkModeStyle" rel="stylesheet" type="text/css" href="https://goddard.blog/theme/dark.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="screen" href=https://goddard.blog/main.css />
+
+    
+
+    <script src=https://goddard.blog/js/feather.min.js></script>
+</head>
+
+<body>
+    <div class="content">
+        <header>
+    <div class="main">
+        <a href=https:&#x2F;&#x2F;goddard.blog></a>
+
+        
+        <div class="socials">
+            
+            <a rel="me" href="https:&#x2F;&#x2F;github.com&#x2F;cg123&#x2F;" class="social">
+                <img alt=github src="/social_icons/github.svg">
+            </a>
+            
+        </div>
+        
+    </div>
+
+    <nav>
+        
+            <a href=&#x2F;posts style="margin-left: 0.7em">&#x2F;posts</a>
+        
+            <a href=&#x2F;about style="margin-left: 0.7em">&#x2F;about</a>
+        
+    </nav>
+
+    
+    <nav>
+        <a id="dark-mode-toggle" onclick="toggleTheme()" href=""></a>
+        <script src=https://goddard.blog/js/themetoggle.js></script>
+    </nav>
+    
+</header>
+
+        
+        
+    
+<main>
+    <article>
+        <div class="title">
+            
+            
+    <div class="page-header">
+        Mixture of Experts for Clowns (at a Circus)
+    </div>
+
+
+                <div class="meta">
+                    
+                        Posted on <time>2023-12-14</time>
+                    
+
+                    
+                </div>
+                
+
+        
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/mistral/">#mistral</a>&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/mixtral/">#mixtral</a>&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/crime/">#crime</a>&nbsp;
+                <a class="post-tag" href="https://goddard.blog/tags/moe/">#moe</a></span>
+    
+        </div>
+
+        
+
+        
+        
+            
+                <h1>Table of Contents</h1>
+                <ul>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/clown-moe/#mixtral">Mixtral</a>
+                        
+                            <ul>
+                                
+                                    <li>
+                                        <a class="toc-link" href="https://goddard.blog/posts/clown-moe/#architecture">Architecture</a>
+                                    </li>
+
+                                    
+                                
+                            </ul>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/clown-moe/#moe-gates-without-training">MoE Gates Without Training</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/clown-moe/#more-weird-more-upsetting">More Weird, More Upsetting</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a class="toc-link" href="https://goddard.blog/posts/clown-moe/#future-work">Future Work</a>
+                        
+                    </li>
+                
+                </ul>
+            
+        
+
+        <section class="body">
+            <h2 id="mixtral">Mixtral</h2>
+<p><a href="https://mistral.ai/">Mistral AI</a> recently released a new model, Mixtral-8x7B-v0.1, and it's a delight. It uses an architecture based on their (also delightful) Mistral-7B, but where the original flavor uses a standard MLP section Mixtral uses a set of eight &quot;experts&quot;.  Clearly the folks at Mistral are doing something right because Mixtral punches way above its weight class.</p>
+<p>Thanks to this release Mixture of Experts has been the hot new buzzword around town. This type of model has historically been pretty tricky to train, but now there's a great base with a permissive license to work from. The open source community is busy at work doing fine tunes of Mixtral and exploring what it's capable of. There are some impressive early takes on it but I suspect it'll take a lot of iteration before we collectively figure out the formula for really extracting the best out of Mixtral.</p>
+<p>There's more potential here than the obvious value in the model itself. Mixtral being released didn't just give us a model, it gave us a known-working Mixture of Experts architecture integrated into the <code>transformers</code> library as a first class citizen. That's big! Now just about anyone can train a MoE model without having to come up with their own bespoke architecture.</p>
+<p>What about the little guy though, huh? This is all great if you have enough GPU laying around to train models, but most people don't. Well I have great news for you, fellow non-billion-dollar-company-or-research-team! The Mixtral architecture has much to offer us. Let's dig in a bit more, because there are some fun things we can do with it.</p>
+<h3 id="architecture">Architecture</h3>
+<p>As I mentioned earlier, Mixtral is quite similar to the Mistral architecture. Aside from the token embedding and language model head you can divide all of the parameters in a Mistral model into three groups: self attention, layernorm, and MLP<sup class="footnote-reference"><a href="#fn-mlp">1</a></sup>. A Mixtral model with eight experts consists of mostly the exact same parameters as a Mistral model. There are two major differences. The first, and most obvious, is that a Mixtral model has eight<sup class="footnote-reference"><a href="#fn-num-experts">2</a></sup> different sets of Mistral MLP parameters - the eponymous experts in our mixture. The second is that each layer has a simple linear gate that assigns a score to each of the eight experts.</p>
+<p>Looking at this setup, my immediate first thought was &quot;neat! I'm going to clown-car a bunch of regular Mistral models together.&quot; If it weren't for the need for gate parameters this would be trivial. Select a model to use the self attention parameters from, then take the MLP parameters from whatever you fancy and cram 'em in there. Unfortunately we really do need gates. You <em>could</em> randomly initialize the gates and do some fine tuning. But that takes time and resources, but we've already established we don't have those. And I like my crimes against common sense to be a bit more accessible.</p>
+<h2 id="moe-gates-without-training">MoE Gates Without Training</h2>
+<p>Instead of turning to the big hammer that is fine tuning let's look a bit at what the gates are actually doing. They are quite simple and straightforward - each gate is a single matrix that takes in a hidden state vector and outputs the expert scores. If you have a hidden size of 4096 and 8 experts, as Mixtral-8x7B does, then they will be 8x4096 matrices. Thanks to our friend Linear Algebra™ we can say that there is a hidden state vector associated with each expert, and at inference time the ones that are closest<sup class="footnote-reference"><a href="#fn-closest">3</a></sup> to the actual current hidden state will be selected.</p>
+<p>With that in mind, there's a straightforward strategy that we can use to select the parameters for the gates. We can choose a set of prompts that we'd like to be associated with each expert, run them through a &quot;base&quot; model, then use the actual hidden state values of the prompts for our gates.</p>
+<p>For example, say that we have a model that is good at math and a model that is good at storywriting. We can compute the hidden states for the prompt &quot;As a Doctor of Math, here is some of my favorite math:&quot; and use those for the gate parameters associated with the math model's MLP parameters. &quot;Chapter 1: The Horse that was Also a Wizard&quot; gives us our indisputably perfect vector for the storywriting model.</p>
+<p>This almost certainly won't give the even distribution of expert use and diffusion of knowledge that training a MoE from scratch would give you but it will work quite nicely for our purposes.</p>
+<p>To be a bit more flexible I wrote a script that takes in a set of positive and negative prompts for each expert and combines their hidden state representations. For my first attempt at this kind of merge, I decided to try combining 5 Mistral models to make a 4-expert Mixtral. It worked pretty well! It's on huggingface <a href="https://huggingface.co/chargoddard/mixtralnt-4x7b-test">here</a>.</p>
+<p>Like I do with most of my early tools, I gave <a href="https://huggingface.co/Undi95">Undi</a> the first look at the script. (Thanks for testing all of my semi-broken junk, Undi.) As usual he cranked out a bunch of cool stuff that blows my initial attempt out of the water. If you're in the mood for trying out the weird, bleeding edge of experimental roleplay models then check out <a href="https://huggingface.co/Undi95/Mixtral-4x7B-DPO-RPChat">Mixtral-4x7B-DPO-RPChat</a>, <a href="https://huggingface.co/Undi95/Mixtral-8x7B-MoE-RP-Story">Mixtral-8x7B-MoE-RP-Story</a>, or <a href="https://huggingface.co/Undi95/Toppy-Mix-4x7B">Undi95/Toppy-Mix-4x7B</a>. You can also see some examples of config files with prompts for the gates.</p>
+<p>Now, this is great and all, but we can go a step further. Right now we just have (parts of) Mistral models ensembled together in our pseudo-Mixtral. Mistral and Mixtral are practically the same word. There's only one letter difference - this isn't nearly weird or upsetting enough of a merge.</p>
+<h2 id="more-weird-more-upsetting">More Weird, More Upsetting</h2>
+<p>Why not a Llama MoE?</p>
+<p>As you might know, Mistral has almost the exact same architecture as Llama. The only difference is in Mistral's use of sliding window attention. As long as you don't go beyond the initial context window you can actually slap the weights from a Mistral model into a program expecting Llama weights and it'll work no problem. This more-or-less works both ways.</p>
+<p>Thanks to the mostly-shared architecture, we can perform the same merge procedure with Llama-based models with minimal tweaking. For an example of one of these in action see Undi's first <a href="https://goddard.blog/posts/clown-moe/#fn-llamix2">Llamix2 4x13B</a>.</p>
+<p>The script is available in mergekit on the <code>mixtral</code> branch <a href="https://github.com/cg123/mergekit/tree/mixtral">here</a>. Give it a shot if you like. Want a 4x13B model? No problem! Why not a 32x1B? Live a little. Treat yourself. There's surely a lot of potential in Mixture of Experts models and there's no reason to let the fact that you don't own a semiconductor fab or substantial stake in NVIDIA to stop you from experimenting.</p>
+<p>For those more inclined to fine tune, there's a mode for random gate initialization (and an option to add gaussian noise to the experts if you're feeling saucy.) Common speculation right now is that Mistral trained Mixtral initialized with Mistral's parameters<sup class="footnote-reference"><a href="#fn-mistral">4</a></sup> so maybe that works? We'll find out.</p>
+<h2 id="future-work">Future Work</h2>
+<p>As mentioned, this approach of using prompts to determine gate vectors almost certainly gives a very different distribution of expert usage from a trained-from-scratch mixture of experts. Recent literature shows standard MoE models tend to have individual experts that focus on specific parts of speech or simple low-level concepts. This approach assigns them according to a more human frame of view - which is potentially both good and bad. Subjective results are pretty great so far but some work definitely needs to be done to evaluate how well the resulting models use their added parameters.</p>
+<p>I'm also investigating using more advanced merging techniques like <a href="https://github.com/sidak/otfusion">otfusion</a> to make MoE merges out of disparate base models. The recent glut of high-quality small foundation models being released with permissive licenses is potentially a great opportunity for making a powerful mixture of experts without spending much of your own money on compute.</p>
+<p>That's all! End of post. Bye now.</p>
+<hr />
+<div class="footnote-definition" id="fn-mlp"><sup class="footnote-definition-label">1</sup>
+<p>This terminology is really funny to me. MLP stands for Multi-Layer Perceptron. Perceptrons are one of the venerable distant ancestors of neural networks as we know them, and are very much not present in modern transformers. They were (are) used for binary classification and have the Heaviside step function as their activation. But we're used to talking about MLPs and &quot;dense linear feedforward network with activation function of the month (vegan)&quot; just doesn't have the same zip.</p>
+</div>
+<div class="footnote-definition" id="fn-num-experts"><sup class="footnote-definition-label">2</sup>
+<p>Eight is just the number used by Mixtral-8x7B - the architecture supports an arbitrary number. Don't do two or fewer though. That breaks the transformers implementation for whatever reason.</p>
+</div>
+<div class="footnote-definition" id="fn-closest"><sup class="footnote-definition-label">3</sup>
+<p>The dot product is the metric we care about here.</p>
+</div>
+<div class="footnote-definition" id="fn-llamix2"><sup class="footnote-definition-label">5</sup>
+<p>This model is a spicy boy. It's a cool world's first public Llama MoE but probably don't show it to your boss or anything. Maybe wait for the second or third one. <a href="https://huggingface.co/Undi95/Llamix2-MLewd-4x13B">Llamix2-MLewd-4x13B</a></p>
+</div>
+<div class="footnote-definition" id="fn-mistral"><sup class="footnote-definition-label">4</sup>
+<p>Mistral mixtral mistral Mistral, Mixtral mistral.</p>
+</div>
+
+        </section>
+    </article>
+</main>
+
+
+    </div>
+</body>
+
+</html>

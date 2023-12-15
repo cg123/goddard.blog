@@ -14,6 +14,10 @@
         <lastmod>2023-10-12</lastmod>
     </url>
     <url>
+        <loc>https://goddard.blog/posts/clown-moe/</loc>
+        <lastmod>2023-12-14</lastmod>
+    </url>
+    <url>
         <loc>https://goddard.blog/posts/frankenllama/</loc>
         <lastmod>2023-08-28</lastmod>
     </url>
@@ -35,6 +39,15 @@
     </url>
     <url>
         <loc>https://goddard.blog/tags/llama/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/tags/mistral/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/tags/mixtral/</loc>
+    </url>
+    <url>
+        <loc>https://goddard.blog/tags/moe/</loc>
     </url>
     <url>
         <loc>https://goddard.blog/tags/reward-model/</loc>
